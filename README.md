@@ -1,5 +1,7 @@
 # discord-lavalink-music-bot
-A music bot for discord
+A music bot for discord. [Click to invite my hosted bot](https://discord.com/api/oauth2/authorize?client_id=725359120881942530&permissions=8&scope=bot).
+
+Though it's not made for public use, you can try it by inviting
 
 # Self Hosting
 First fill up the `config.json.example` file with your details, and rename it to `config.json`. Then save.
