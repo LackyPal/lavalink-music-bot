@@ -52,7 +52,8 @@
     "genius-lyrics": "^4.2.9",
     "glob": "^7.1.7",
     "moment": "^2.29.1",
-    "moment-duration-format": "^2.3.2"
+    "moment-duration-format": "^2.3.2",
+    "string-progressbar": "^1.0.4"
   },
   "devDependencies": {
     "eslint": "^7.30.0",
