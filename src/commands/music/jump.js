@@ -18,11 +18,10 @@ module.exports = {
 
     const index = Number(args[0]);
 
-    if (!index || index > queue.length || index < 1)
+    if (!index || !queue[index] || index > queue.length || index < 1)
       return bot.say.ErrorMessage(message, "Provided Song Index does not exist.");
 
-    queue.remove(0, index - 1);
-    player.stop();
+    player.stop(index);
 
     return bot.say.QueueMessage(bot, player, `Skipped \`${index}\` songs.`);
   }
