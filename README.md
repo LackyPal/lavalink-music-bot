@@ -1,5 +1,5 @@
 # discord-lavalink-music-bot
-A music bot for discord. [Click to invite my hosted bot](https://discord.com/api/oauth2/authorize?client_id=725359120881942530&permissions=8&scope=bot).
+A music bot for discord. [Click to invite my hosted bot](https://discord.com/api/oauth2/authorize?client_id=725359120881942530&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F4YpXu7bMf9&scope=bot%20applications.commands).
 
 Though it's not made for public use, you can try it by inviting
 
