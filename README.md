@@ -1,7 +1,5 @@
 # discord-lavalink-music-bot
-A music bot for discord. [Click to invite my hosted bot](https://discord.com/api/oauth2/authorize?client_id=725359120881942530&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F4YpXu7bMf9&scope=bot%20applications.commands).
-
-Though it's not made for public use, you can try it by inviting
+A music bot for discord
 
 # Self Hosting
 First fill up the `config.json.example` file with your details, and rename it to `config.json`. Then save.
@@ -20,12 +18,10 @@ First fill up the `config.json.example` file with your details, and rename it to
 
 # Disclaimer
 You are not allowed to upload this bot to any service such as discordbotlist or top.gg, you are only allowed to host this bot for your community.
+You can still use this code to make a music system in your bot, as long you give some sort of credit anywhere in your bot
 
 # Support this project
 All stars/forks are appreciated! ⚡
 Feel free to open a pull request with a new feature.
 
-Made with ❤️ and JavaScript, discord.js v13-dev, lavalink, erela.js!
-
-License
-[MIT © L0SER8228](./LICENSE)
+Made with ❤️ and JavaScript, discord.js v13, lavalink, erela.js!
