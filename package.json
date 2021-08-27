@@ -4,7 +4,8 @@
   "description": "Lavalink music bot for discord made with erela.js and discord.js v13-dev",
   "main": "src/index.js",
   "engines": {
-    "node": "16.x"
+    "node": ">=16.6.0",
+    "npm": ">=7.0.0"
   },
   "scripts": {
     "lint": "eslint . --ext .js",
