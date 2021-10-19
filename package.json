@@ -43,7 +43,7 @@
   "author": "L0SER8228",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/builders": "^0.6.0",
+    "@discordjs/builders": "^0.7.0",
     "@discordjs/opus": "^0.6.0",
     "chalk": "^4.1.1",
     "discord.js": "^13.1.0",
