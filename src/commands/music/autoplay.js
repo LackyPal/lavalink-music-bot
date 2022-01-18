@@ -1,7 +1,7 @@
 module.exports = {
   name: "autoplay",
   aliases: ["ap", "auto"],
-  description: "Toggle the bot to autoplay recommended songs.",
+  description: "Toggle to autoplay recommended songs.",
   category: "music",
   execute(bot, message) {
     const player = bot.manager.get(message.guild.id);

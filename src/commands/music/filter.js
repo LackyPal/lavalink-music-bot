@@ -16,8 +16,8 @@ module.exports = {
     if (args[0]?.toLowerCase() === "reset") {
       player.clearEQ();
       player.set("filter", null);
-      return bot.say.successMessage(message, "Removed all filters.");
 
+      return bot.say.successMessage(message, "Removed all filters.");
     } else {
       return bot.say.successMessage(message, `Current applied filter is \`${player.get("filter")}\`.`);
     }

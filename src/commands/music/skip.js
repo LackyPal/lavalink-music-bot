@@ -1,7 +1,7 @@
 module.exports = {
   name: "skip",
   aliases: ["s", "next"],
-  description: "Lets you skip the current song",
+  description: "Skip the current song",
   category: "music",
   execute(bot, message) {
     const player = bot.manager.get(message.guild.id);

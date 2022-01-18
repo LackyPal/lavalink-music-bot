@@ -18,7 +18,7 @@ module.exports = {
 
     const index = Number(args[0]);
 
-    if (!index || !queue[index] || index > queue.length || index < 1)
+    if (!index || isNaN(index) || !queue[index] || index > queue.length || index < 1)
       return bot.say.wrongMessage(message, "Provided Song Index does not exist.");
 
     player.stop(index);

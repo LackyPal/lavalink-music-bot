@@ -1,6 +1,6 @@
 module.exports = {
   name: "remove",
-  aliases: ["rm"],
+  aliases: ["rm", "del", "delete", "drop"],
   description: "Remove a specific song from the queue",
   category: "music",
   subCommands: ["range <from> <to>**\nRemove a range of tracks from the queue."],
