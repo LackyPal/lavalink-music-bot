@@ -64,6 +64,9 @@ Type \`${serverPrefix}help\` for all available commands.`);
 
       const command = bot.utils.resolveCommand(bot, cmd);
       if (!command) return;
+      
+if ((command.category === "botowner" || command.ownerOnly === true) && !config.BOT_OWNER_IDS.includes(userId))
+        return bot.say.wrongMessage(message, "This command can only be used by the bot owners.");
 
       const timestamps = bot.cooldowns.get(command.name);
       const now = Date.now();
