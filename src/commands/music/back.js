@@ -1,24 +1,24 @@
 module.exports = {
   name: "back",
   aliases: ["prev", "previous"],
-  description: "Backs to the previous song",
+  description: "Back to the previous song",
   category: "music",
   execute(bot, message) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     const track = player.queue.previous;
 
     if (!track)
-      return bot.say.WarnMessage(message, "No previous track was found.");
+      return bot.say.wrongMessage(message, "No previous track was found.");
 
     player.queue.add(track, 0);
     player.stop();
 
-    return bot.say.QueueMessage(bot, player, "Backed to the previous song.");
+    return bot.say.successMessage(message, "Backed to the previous song.");
   }
 };

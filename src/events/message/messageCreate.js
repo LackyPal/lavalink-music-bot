@@ -1,111 +1,92 @@
-const DJS = require("discord.js");
+const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
+const config = require("../../../config.json");
 
 module.exports = {
   name: "messageCreate",
-  /**
-   *
-   * @param {import("discord.js").Client} bot
-   * @param {import("discord.js").Message} message
-   */
   async execute(bot, message) {
     try {
-      if (!message?.guild?.available || !message.guild) return;
+      if (!message) return;
+      if (!message.guild?.available || !message.guild) return;
       if (message.channel.type === "DM") return;
       if (!bot.user) return;
-      if (!message.guild?.me) return;
+      if (!message.guild.me) return;
+      if (!message.channel.permissionsFor(message.guild.me)?.has(2048n)) return;
 
-      if (!message.channel.permissionsFor(message.guild.me)?.has(DJS.Permissions.FLAGS.SEND_MESSAGES)) return;
+      const guildId = message.guild.id;
+      const userId = message.author?.id;
 
-      const guildId = message?.guild?.id;
-      const userId = message?.author?.id;
-      const channel = message?.channel;
-      const cooldowns = bot.cooldowns;
-      
-      const serverPrefix = bot.env.ptefix ?? "!";
+      const serverPrefix = config.PREFIX ?? ">";
 
       const escapeRegex = (str) => str?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const prefix = new RegExp(`^(<@!?${bot.user.id}>|${escapeRegex(serverPrefix)}\\s*`);
+      const prefixReg = new RegExp(`^(<@!?${bot?.user?.id}>|${escapeRegex(serverPrefix)})\\s*`);
 
-      // Commands
-      if (!prefix.test(message.content) || message.author.bot || userId === bot.user.id) return;
+      const prefixArr = message.content.match(prefixReg);
+      const prefix = prefixArr?.[0];
 
-      const [, matchedPrefix] = message.content.match(prefix);
-      const args = message.content.slice(matchedPrefix.length).trim().split(/ +/g);
-      const command = args.shift().toLowerCase();
+      if (!prefix) return; // prefix didn't match
+      if (!prefixReg.test(message.content) || message.author.bot || userId === bot.user.id) return;
+      const [arg, ...args] = message.content.slice(prefix?.length).trim().split(/ +/g);
+      const cmd = arg.toLowerCase();
 
-      if (message.mentions.has(bot.user.id) && !command) {
-        bot.say.InfoMessage(message, `My prefix is **\`${serverPrefix}\`**`);
+      if (
+        !message.channel.permissionsFor(message.guild.me)?.has(16384n) &&
+        bot.user.id !== userId
+      ) {
+        return message.reply({
+          content: `Error: I need \`Embed Links\` permission to work!`
+        });
       }
 
-      const cmd = bot.commands.get(command) || bot.commands.get(bot.aliases.get(command));
-      if (!bot.commands.has(cmd?.name)) return;
+      // bot mention
+      if (message.mentions.members?.has(bot.user.id) && !cmd) {
+        const embed = new MessageEmbed()
+          .setAuthor({
+            name: bot.user.tag,
+            iconURL: bot.user.displayAvatarURL()
+          })
+          .setDescription(`My prefix is **${serverPrefix}**
+Type \`${serverPrefix}help\` for all available commands.`);
 
-      if (!channel.permissionsFor(message.guild.me)?.has(DJS.Permissions.FLAGS.EMBED_LINKS) && bot.user.id !== userId) {
-        return channel.send({ content: `Error: I need \`EMBED_LINKS\` permission to work.` });
+        const supportBtn = new MessageButton()
+          .setLabel("Support")
+          .setStyle("LINK")
+          .setURL(`${config.SUPPORT_SERVER_LINK}`);
+
+        const inviteBtn = new MessageButton()
+          .setLabel("Invite")
+          .setStyle("LINK")
+          .setURL(`${config.BOT_INVITE_LINK}`);
+
+        const buttonsRow = new MessageActionRow().addComponents([supportBtn, inviteBtn]);
+
+        return message.reply({ embeds: [embed], components: [buttonsRow] });
       }
 
+      const command = bot.utils.resolveCommand(bot, cmd);
+      if (!command) return;
+
+      const timestamps = bot.cooldowns.get(command.name);
       const now = Date.now();
-      const timestamps = cooldowns.get(cmd.name);
-      const cooldownAmount = cmd.cooldown * 1000;
+      const cooldown = command.cooldown ? command.cooldown * 1000 : 3000;
 
-      if (cmd.ownerOnly && !bot.env.owners.includes(userId)) {
-        return bot.say.ErrorMessage(message, "This command can only be used by the bot owners.");
-      }
-
-      // botPermissions
-      if (cmd.botPermissions) {
-        const neededPerms = [];
-        cmd.botPermissions.forEach((perm) => {
-          if (!(channel).permissionsFor(message.guild.me)?.has(`DJS.Permissions.FLAGS.${perm}`)) {
-            neededPerms.push(perm);
-          }
-        });
-
-        if (neededPerms.length > 0) {
-          return bot.say.ErrorMessage(message,
-            `I need ${neededPermissions
-              .map((p) => `\`${bot.util.toTitleCase(p)}\``)
-              .join(", ")} permissions!`
-          );
-        }
-      }
-
-      // memberPermissions
-      if (cmd.memberPermissions) {
-        const neededPerms = [];
-        cmd.memberPermissions.forEach((perm) => {
-          if (!(message.channel).permissionsFor(message.member)?.has(`DJS.Permissions.FLAGS.${perm}`)) {
-            neededPerms.push(perm);
-          }
-        });
-
-        if (neededPerms.length > 0) {
-          return bot.say.ErrorMessage(message,
-            `You need: ${neededPermissions
-              .map((p) => `\`${bot.util.toTitleCase(p)}\``)
-              .join(", ")} permissions!`
-          );
-        }
-      }
-
-      if (timestamps.has(userId)) {
+      if (timestamps?.has(userId)) {
         const userTime = timestamps.get(userId);
-        const expTime = userTime + cooldownAmount;
+        const expireTime = userTime + cooldown;
 
-        if (now < expTime) {
-          const timeLeft = (expTime - now) / 1000;
-          const embed4 = `\`${cmd.name}\` command is on cooldown for another \`${timeLeft.toFixed(1)}\`.`;
-          return bot.say.WarnMessage(message, embed4);
+        if (now < expireTime) {
+          const timeLeft = (expireTime - now) / 1000;
+
+          return bot.say.wrongMessage(message, `Please wait **${timeLeft.toFixed(1)}** second more before reusing the \`${command.name}\` comnand.`);
         }
       }
 
-      timestamps.set(userId, now);
-      setTimeout(() => timestamps.delete(userId), cooldownAmount);
+      timestamps?.set(userId, now);
+      setTimeout(() => timestamps?.delete(userId), cooldown);
 
-      cmd.execute(bot, message, args);
+      await command.execute(bot, message, args);
     } catch (err) {
-      bot.say.ErrorMessage(message, "Something went wrong. Sorry for the inconveniences.");
-      return bot.util.sendErrorLog(bot, err, "error");
+      bot.utils.sendErrorLog(bot, err, "error");
+      return bot.say.wrongMessage(message, "Something went wrong.");
     }
   }
 };

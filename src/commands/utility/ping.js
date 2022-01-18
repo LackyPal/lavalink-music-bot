@@ -1,5 +1,3 @@
-const { MessageEmbed } = require("discord.js");
-
 module.exports = {
   name: "ping",
   aliases: ["latency"],
@@ -7,15 +5,13 @@ module.exports = {
   cooldown: "4",
   category: "utility",
   async execute(bot, message) {
-    const embed1 = new MessageEmbed()
-      .setColor(message.guild.me.displayColor || "#00FFFF")
+    const embed1 = bot.say.baseEmbed(message)
       .setDescription("Pinning...");
 
-    const firstMsg = await message.channel.send({ embeds: [embed1] })
+    const firstMsg = await message.reply({ embeds: [embed1] })
 
-    const embed2 = new MessageEmbed()
+    const embed2 = bot.say.baseEmbed(message)
       .setTitle("🏓 Pong")
-      .setColor(message.guild.me.displayColor || "#00FFFF")
       .setDescription(`💓: ${Math.round(bot.ws.ping)} ms
 ⏱️: ${Date.now() - message.createdTimestamp} ms`);
 

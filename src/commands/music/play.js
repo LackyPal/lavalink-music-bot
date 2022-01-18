@@ -4,91 +4,104 @@ module.exports = {
   description: "Play a song or playlist from url or name",
   category: "music",
   cooldown: "4",
-  usage: " [flags] <song url/name>",
-  subCommands: ["next <song url/name>**\nEnqueue the provided song to the top.", "skip <song url/name>**\nSkip and play the provided song instantly."],
+  usage: "<song url/name> [flags]",
   async execute(bot, message, args) {
-    let string = args.join(" ");
+    let query = args.join(" ");
 
-    if (!string)
-      return bot.say.ErrorMessage(message, "No song name or url provided!");
-
-    let type = args[0]?.toLowerCase();
+    const flag = args[args.length - 1]?.toLowerCase();
     let position = undefined;
 
-    if (type === "next" || type === "skip") {
-      string = args.slice(1).join(" ");
+    if (flag === "--next" || flag === "--skip") {
+      query = args.slice(0, -1).join(" ");;
       position = 0;
     }
 
-    const guildPlayer = bot.manager.get(message.guild.id);
+    if (!query)
+      return bot.say.wrongMessage(message, "No song name or url provided!");
+
+    let player = bot.manager.get(message.guild.id);
 
     const channel = message.member?.voice.channel;
 
     if (!channel)
-      return bot.say.WarnMessage(message, "You have to join a voice channel first.");
+      return bot.say.wrongMessage(message, "You have to join a voice channel first.");
 
-    if (guildPlayer && channel.id !== guildPlayer?.voiceChannel)
-      return bot.say.WarnMessage(message, "I'm already playing in a different voice channel!");
+    if (player) {
+      if (channel.id !== player.voiceChannel)
+        return bot.say.wrongMessage(message, "I'm already playing in a different voice channel!");
 
-    if (!channel?.viewable)
-      return bot.say.WarnMessage(message, "I need **\`VIEW_CHANNEL\`** permission.");
-    if (!channel?.joinable)
-      return bot.say.WarnMessage(message, "I need **\`CONNECT_CHANNEL\`** permission.");
-    if (!channel?.speakable)
-      return bot.say.WarnMessage(message, "I need **\`SPEAK\`** permission.");
+    } else {
+      if (!channel.viewable)
+        return bot.say.wrongMessage(message, "I need \`View Channel\` permission.");
 
-    try {
-      let player;
-      if (guildPlayer) player = guildPlayer;
-      else player = bot.manager.create({
-        guild: message.guild.id,
-        voiceChannel: channel.id,
-        textChannel: message.channel.id,
-        selfDeafen: true
-      });
+      if (!channel.joinable)
+        return bot.say.wrongMessage(message, "I need \`Connect Channel\` permission.");
 
-      const queue = player.queue;
+      if (!channel.speakable)
+        return bot.say.wrongMessage(message, "I need \`Speak\` permission.");
 
-      if (player.state !== "CONNECTED") await player.connect();
-      let result = await player.search(string, message.author);
-      if (result.loadType === "LOAD_FAILED") {
+      if (channel.full)
+        return bot.say.wrongMessage(message, "Can't join, the voice channel is full.");
+    }
+
+    if (message.member.voice.deaf)
+      return bot.say.wrongMessage(message, "You cannot run this command while deafened.");
+
+    if (message.guild.me?.voice?.mute)
+      return bot.say.wrongMessage(message, "Please unmute me before playing.");
+
+    if (!player) player = bot.manager.create({
+      guild: message.guild.id,
+      voiceChannel: channel.id,
+      textChannel: message.channel.id,
+      selfDeafen: true
+    });
+
+    const queue = player.queue;
+
+    if (player.state !== "CONNECTED") await player.connect();
+
+    const result = await player.search(query, message.author);
+
+    switch (result.loadType) {
+      case "LOAD_FAILED":
+      case "NO_MATCHES":
         if (!queue.current) player.destroy();
-        bot.say.ErrorMessage(message, "No result was found.");
-        return bot.logger.error("SEARCH_FAILED", result.exception.message || result.exception)
-      }
 
-      switch (result.loadType) {
-        case "NO_MATCHES":
-          if (!queue.current) player.destroy();
-          return bot.say.ErrorMessage(message, "No result was found.");
-          break;
-        case "PLAYLIST_LOADED":
-          const plTracks = result.tracks;
-          queue.add(plTracks, position);
+        return bot.say.wrongMessage(message, "No result was found.");
+        break;
 
-          bot.say.InfoMessage(message, `${ plTracks.length} tracks queued from: \`${result.playlist.name}\``);
-          if (!player.playing && !player.paused && queue.totalSize === plTracks.length) return await player.play();
-          if (type === "skip") return await player.stop();
-          break;
-        default:
-          //  case "TRACK_LOADED":
-          //  case "SEARCH_RESULT":
-          const track = result.tracks[0];
-          queue.add(track, position);
+      case "PLAYLIST_LOADED":
+        const plTracks = result.tracks;
+        queue.add(plTracks, position);
 
-          if (!player.playing && !player.paused && !queue.size) return await player.play();
+        bot.say.successMessage(message, `${ plTracks.length} tracks queued from: \`${result.playlist.name}\``);
 
-          if (type === "skip") return await player.stop();
+        if (!player.playing && !player.paused && queue.totalSize === plTracks.length)
+          return await player.play();
 
-          if (queue.size >= 0) {
-            const embed = bot.say.RootEmbed(message)
-              .setTitle(`Track queued - Position ${queue.indexOf(track) + 1}`)
-              .setDescription(`[${track.title}](${track.uri}) ~ [${message.author.toString()}]`);
-            return message.channel.send({ embeds: [embed] }).catch(console.error);
-          }
-      }
-    } catch (e) {
-      bot.logger.error("PLAY", e?.stack || e);
+        if (flag === "--skip")
+          return await player.stop();
+        break;
+
+      default:
+        //  case "TRACK_LOADED":
+        //  case "SEARCH_RESULT":
+        const track = result.tracks[0];
+        queue.add(track, position);
+
+        if (!player.playing && !player.paused && !queue.size)
+          return await player.play();
+
+        if (type === "--skip")
+          return await player.stop();
+
+
+        const embed = bot.say.baseEmbed(message)
+          .setTitle(`Track queued - Position ${queue.indexOf(track) + 1}`)
+          .setDescription(`[${track.title}](${track.uri}) ~ [${message.author.toString()}]`);
+
+        return message.reply({ embeds: [embed] }).catch(console.error);
     }
   }
 };

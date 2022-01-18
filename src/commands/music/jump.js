@@ -7,22 +7,22 @@ module.exports = {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     const queue = player.queue;
 
     if (queue.length < 1)
-      return bot.say.ErrorMessage(message, "There is currently no song in the queue.");
+      return bot.say.wrongMessage(message, "There is currently no song in the queue.");
 
     const index = Number(args[0]);
 
     if (!index || !queue[index] || index > queue.length || index < 1)
-      return bot.say.ErrorMessage(message, "Provided Song Index does not exist.");
+      return bot.say.wrongMessage(message, "Provided Song Index does not exist.");
 
     player.stop(index);
 
-    return bot.say.QueueMessage(bot, player, `Skipped \`${index}\` songs.`);
+    return bot.say.successMessage(message, `Skipped \`${index}\` songs.`);
   }
 };

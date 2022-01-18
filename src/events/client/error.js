@@ -1,6 +1,6 @@
 module.exports = {
   name: "error",
   execute(bot, error) {
-    return bot.util.sendErrorLog(bot, error, "error");
+    return bot.utils.sendErrorLog(bot, error, "error");
   }
 };

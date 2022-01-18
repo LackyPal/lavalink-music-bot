@@ -4,47 +4,53 @@ module.exports = {
   description: "Remove a specific song from the queue",
   category: "music",
   subCommands: ["range <from> <to>**\nRemove a range of tracks from the queue."],
-  async execute(bot, message, args) {
+  execute(bot, message, args) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     const queue = player.queue;
 
     if (queue.length < 1)
-      return bot.say.WarnMessage(message, "There's no song to remove in the queue.");
-
-    if (!args[0])
-      return bot.say.WarnMessage(message, "You forgot the track id to remove.");
+      return bot.say.wrongMessage(message, "There's no song to remove in the queue.");
 
     if (args[0]?.toLowerCase() === "range") {
-      if (!args[1] || !args[2] || isNaN(args[1]) || isNaN(args[2]))
-        return bot.say.WarnMessage(message, "Please provide valid Song Index.");
+      if (!args[1])
+        return bot.say.wrongMessage(message, "You forgot to provide the start track index.");
 
-      let start = (Number(args[1]) - 1);
-      let end = (Number(args[2]) - 1);
+      if (!args[2])
+        return bot.say.wrongMessage(message, "You forgot to provide the end track index.");
 
-      if (start < 0 || end < 0 || start > queue.length || !queue[start] || end > queue.length || !queue[end])
-        return bot.say.WarnMessage(message, "Please provide valid Song Index.");
+      const start = Number(args[1]) - 1;
+      const end = Number(args[2]) - 1;
+
+      if (isNaN(start) || start < 0 || start > queue.length || !queue[start])
+        return bot.say.wrongMessage(message, "Provided start Song Index is not valid..");
+
+      if (isNaN(end) || end < 0 || end > queue.length || !queue[end])
+        return bot.say.wrongMessage(message, "Provided end Song Index is not valid.");
 
       if (start >= end)
-        return bot.say.WarnMessage(message, "The starting position cannot greater than ending position.");
+        return bot.say.wrongMessage(message, "The starting position cannot be greater than ending position.");
 
       const delTracks = queue.remove(start, end);
 
-      return bot.say.QueueMessage(bot, player, `Removed \`${delTracks.length}\` tracks.`);
+      return bot.say.successMessage(message, `Removed \`${delTracks.length}\` tracks.`);
     } else {
-      const index = (Number(args[0]) - 1);
+      if (!args[0])
+        return bot.say.wrongMessage(message, "You forgot to provide the track index to remove.");
 
-      if (isNaN(args[0]) || !index || index < 0 || index > queue.length || !queue[index])
-        return bot.say.WarnMessage(message, "Provided Song Index does not exist.");
+      const index = Number(args[0]) - 1;
 
-      queue.remove(index);
+      if (!index || isNaN(index) || index < 0 || index > queue.length || !queue[index])
+        return bot.say.wrongMessage(message, "Provided Song Index does not exist.");
 
-      return bot.say.QueueMessage(bot, player, `Removed track \`${args[1]}\`.`);
+      const track = queue.remove(index)[0];
+
+      return bot.say.successMessage(message, `Removed \`${track.title}\`.`);
     }
   }
 };

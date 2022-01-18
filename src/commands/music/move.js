@@ -3,54 +3,40 @@ module.exports = {
   aliases: ["mv"],
   description: "Move the selected song to the provided position in the queue",
   category: "music",
-  subCommands: ["<song number>**\nMove the selected song to the top of the queue.", "last**\nMove the last track in the queue to the top"],
-  async execute(bot, message, args) {
+  execute(bot, message, args) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
     const queue = player.queue;
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     if (queue.length < 3)
-      return bot.say.WarnMessage(message, "Need at least \`3\` songs in the queue to use this command.");
+      return bot.say.wrongMessage(message, "Need at least \`3\` songs in the queue to use this command.");
 
     if (!args[0])
-      return bot.say.WarnMessage(message, "You forgot the track id to move.");
+      return bot.say.wrongMessage(message, "You forgot to provide the track index.");
 
-    let fromPos = args[0];
-    let toPos = args[1] -1;
-    if (!toPos) toPos = 0;
+    if (!args[1])
+      return bot.say.wrongMessage(message, "You forgot to provide the new position.");
 
-    if (args[0]?.toLowerCase() === "top") {
-      fromPos = args[1] -1;
-      toPos = 0;
-    }
+    const from = Number(args[0]) - 1;
+    const to = Number(args[1]) - 1;
 
-    if (fromPos?.toLowerCase() === "last") {
-      fromPos = queue.length - 1;
-      toPos = 0;
-    }
+    if (!from || isNaN(from) || from < 0 || from > queue.length || !queue[from])
+      return bot.say.wrongMessage(message, "Provided Song Index does not exist.");
 
+    if (!to || isNaN(to) || to < 0 || to > queue.length || !queue[to])
+      return bot.say.wrongMessage(message, "Provided position does not exist.");
 
-    if (!fromPos || !toPos || isNaN(fromPos) || isNaN(toPos))
-      return bot.say.WarnMessage(message, "Provided Song Index does not exist.");
+    if (from === to)
+      return bot.say.wrongMessage(message, "The song is already in this position.");
 
-    const fr = Number(fromPos);
-    const to = Number(toPos);
-
-    if (!fr || !to || fr < 0 || to < 0 || fr > queue.length || !queue[fr] || to > queue.length || !queue[to])
-      return bot.say.WarnMessage(message, "Provided Song Index does not exist.");
-
-    if (fr === to)
-      return bot.say.WarnMessage(message, "The song is already in this position.");
-
-    const song = queue[fr];
-    queue.splice(fr, 1);
+    const song = queue.splice(from, 1)[0];
     queue.splice(to, 0, song);
 
-    return bot.say.QueueMessage(bot, player, `**[${song.title}](${song.uri})** has been moved to the **position ${to}** in the queue.`);
+    return bot.say.successMessage(message, `**[${song.title}](${song.uri})** is moved to the **position ${to}** in the queue.`);
   }
 };

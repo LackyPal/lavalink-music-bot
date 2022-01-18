@@ -1,17 +1,17 @@
 module.exports = {
   name: "stop",
-  description: "Stops the player and clears the queue.",
+  description: "Stop playing and leave the voice channel",
   category: "music",
   execute(bot, message) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     player.destroy();
 
-    return bot.say.QueueMessage(bot, player, "Music stopped. Left the voice channel.");
+    return bot.say.successMessage(message, "Music stopped. Left the voice channel.");
   }
 };

@@ -1,27 +1,26 @@
 module.exports = {
   name: "volume",
   aliases: ["vol", "v"],
-  description: "Shows the current volume",
+  description: "Check or change the volume",
   category: "music",
-  subCommands: ["<1-200>**\nLets you change the bots output volume."],
   execute(bot, message, args) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     if (!args[0])
-      return bot.say.InfoMessage(message, `Volume is at \`${player.volume}%\`.`);
+      return bot.say.successMessage(message, `Volume is set at \`${player.volume} %\`.`);
 
     const newVol = Number(args[0]);
 
     if (!newVol || isNaN(newVol) || !Number.isInteger(newVol) || newVol > 200 || newVol < 0)
-      return bot.say.WarnMessage(message, "Provide a valid number between 1 to 200.");
+      return bot.say.wrongMessage(message, "Provide a valid number between 1 to 200.");
 
     player.setVolume(newVol);
 
-    return bot.say.QueueMessage(bot, player, `Volume is updated to \`${player.volume}%\`.`);
+    return bot.say.successMessage(message, `Volume is updated to \`${player.volume}%\`.`);
   }
 };

@@ -1,62 +1,46 @@
-const bb = require("../../data/bbfilters.json");
+const levels = {
+  off: 0.0,
+  low: 0.20,
+  medium: 0.45,
+  high: 0.70,
+  extreme: 1.0,
+  earrape: 1.5
+};
 
 module.exports = {
   name: "bassboost",
   aliases: ["bb", "bass"],
-  description: "Shows the current bassboost level",
+  description: "Change or check the bassboost level",
+  usage: "[level]",
   category: "filters",
-  subCommands: ["<off | low | medium | high | extreme | earrape>**\nSets the bassboost level (off | low | medium | high | extreme | earrape)", "<boost factor>**\nSets the bassboost from 0 (min bass) to 5 (max bass)"],
   execute(bot, message, args) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     let bbLvl = player.get("filter");
     if (!bbLvl || !bbLvl.includes("bb")) bbLvl = "none";
     else bbLvl = bbLvl.split("bb")[1];
 
-    if (!args.length) return bot.say.InfoMessage(message, `Bassboost level is set at \`${bbLvl}\`.`);
+    const value = args[0]?.toLowerCase();
 
-    const level = args[0]?.toLowerCase();
+    if (!args.length || !levels[value])
+      return bot.say.successMessage(message, `Bassboost level is set at \`${bbLvl}\`.`);
 
-    switch (level) {
-      case "none":
-      case "0":
-        player.setEQ(bb.none);
-        player.set("filter", "bbnone");
-        break;
-      case "low":
-      case "1":
-        player.setEQ(bb.low);
-        player.set("filter", "bblow");
-        break;
-      case "medium":
-      case "2":
-        player.setEQ(bb.medium);
-        player.set("filter", "bbmedium");
-        break;
-      case "high":
-      case "3":
-        player.setEQ(bb.high);
-        player.set("filter", "bbhigh");
-        break;
-      case "extreme":
-      case "4":
-        player.setEQ(bb.extreme);
-        player.set("filter", "bbextreme");
-        break;
-      case "earrape":
-      case "5":
-        player.setEQ(bb.earrape);
-        player.set("filter", "bbearrape");
-        break;
-      default:
-        return bot.say.ErrorMessage(message, "Bass boost level must be one of the following: `none`, `low`, `medium`, `high`, `extreme`, `earrape`");
-    }
+    player.node.send({
+      op: "filters",
+      guildId: message.guild.id,
+      equalizer: [
+        ...Array(6).fill(0).map((n, i) => ({ band: i, gain: levels[value] })),
+        ...Array(9).fill(0).map((n, i) => ({ band: i + 6, gain: 0 }))
+      ]
+    });
 
-    return bot.say.QueueMessage(bot, player, `Set bassboost level to \`${level}\`.`);
+    player.set("filter", value === "off" ? null : `bb_${value}`);
+
+    return bot.say.successMessage(message, value === "off" ? "Disabled the bassboost filter." : `Bassboost level set to \`${value}\`.`);
   }
 };

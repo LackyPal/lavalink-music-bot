@@ -1,18 +1,18 @@
 module.exports = {
   name: "autoplay",
   aliases: ["ap", "auto"],
-  description: "Toggle the bot to continuously queue up recommended songs.",
+  description: "Toggle the bot to autoplay recommended songs.",
   category: "music",
   execute(bot, message) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
-    if (!bot.canModifyQueue(message)) return;
+    if (!bot.utils.modifyQueue(message)) return;
 
     player.set("autoplay", !player.get("autoplay"));
 
-    return bot.say.QueueMessage(bot, player, `Turned \`${player.get("autoplay") ? "on" : "off"}\` autoplay mode.`);
+    return bot.say.successMessage(message, `**${player.get("autoplay") ? "Enabled" : "Disabled"}** autoplay mode.`);
   }
 };

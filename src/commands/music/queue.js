@@ -4,17 +4,16 @@ module.exports = {
   description: "Shows the queue.",
   cooldown: "4",
   category: "music",
-  subCommands: ["<page number>**\nShow a specific page of the queue."],
   execute(bot, message, args) {
     const player = bot.manager.get(message.guild.id);
 
     if (!player)
-      return bot.say.ErrorMessage(message, "The bot is currently not playing.");
+      return bot.say.wrongMessage(message, "The bot is currently not playing in this server.");
 
     const queue = player.queue;
 
     if (!queue.length)
-      return bot.say.WarnMessage(message, "There is currently no song in the queue.");
+      return bot.say.wrongMessage(message, "There is no song in the queue.");
 
     const multiple = 10;
     let page = Number(args) || 1;
@@ -28,10 +27,15 @@ module.exports = {
 
     const tracks = queue.slice(start, end);
 
-    const embed = bot.say.RootEmbed(message)
-      .setDescription(`${tracks.map((song, i) => `${start + (++i)} - [${song.title}](${song.uri}) ~ [${song.requester.toString()}]`).join("\n")}`)
-      .setFooter(`Page ${page} of ${maxPages} | song ${start + 1} to ${end > queue.length ? `${queue.length}` : `${end}`} of ${queue.length}`, message.author.displayAvatarURL({ dynamic: true }));
+    const embed = bot.say.baseEmbed(message)
+      .setDescription(
+        `${tracks.map((song, i) => `${start + (++i)} - [${song.title}](${song.uri}) ~ [${song.requester.toString()}]`).join("\n")}`
+      )
+      .setFooter({
+        text: `Page ${page} of ${maxPages} | song ${start + 1} to ${end > queue.length ? `${queue.length}` : `${end}`} of ${queue.length}`,
+        iconURL: message.member.displayAvatarURL({ dynamic: true })
+      });
 
-    return message.channel.send({ embeds: [embed] }).catch(console.error);
+    return message.reply({ embeds: [embed] }).catch(console.error);
   }
 };

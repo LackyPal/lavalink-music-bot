@@ -1,0 +1,10 @@
+{
+  "PREFIX": "",
+  "DISCORD_BOT_TOKEN": "",
+  "SPOTIFY_CLIENT_ID": "",
+  "SPOTIFY_CLIENT_SECRET": "",
+  "BOT_INVITE_LINK": "",
+  "SUPPORT_SERVER_LINK": "",
+  "BOT_OWNER_IDS": [],
+  "LOGS_CHANNEL_ID": ""
+}

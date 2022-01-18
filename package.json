@@ -1,22 +1,15 @@
 {
   "name": "discord-lavalink-music-bot",
-  "version": "1.0.0",
-  "description": "Lavalink music bot for discord made with erela.js and discord.js v13-dev",
+  "version": "1.5.0",
+  "description": "Lavalink music bot for discord made with erela.js and discord.js v13",
   "main": "src/index.js",
   "engines": {
     "node": ">=16.6.0",
     "npm": ">=7.0.0"
   },
   "scripts": {
-    "lint": "eslint . --ext .js",
     "test": "echo \"error: no test specified\" && exit 1",
     "start": "node src/index.js"
-  },
-  "lint-staged": {
-    "./src/**/*.+(js)": [
-      "eslint --fix",
-      "git add"
-    ]
   },
   "repository": {
     "type": "git",
@@ -31,7 +24,7 @@
     "discord.js",
     "discordjs",
     "discord",
-    "discordjs-13",
+    "djs-13",
     "discord-music-bot",
     "music-bot",
     "erelajs",
@@ -45,24 +38,14 @@
   "dependencies": {
     "@discordjs/builders": "^0.11.0",
     "@discordjs/opus": "^0.7.0",
-    "chalk": "^4.1.1",
-    "discord.js": "^13.1.0",
+    "chalk": "^4.1.2",
+    "discord.js": "^13.5.1",
     "erela.js": "^2.3.3",
     "erela.js-deezer": "^1.0.5",
     "erela.js-facebook": "^1.0.4",
     "erela.js-spotify": "^1.2.0",
     "genius-lyrics": "^4.2.9",
     "glob": "^7.1.7",
-    "moment": "^2.29.1",
-    "moment-duration-format": "^2.3.2",
     "string-progressbar": "^1.0.4"
-  },
-  "devDependencies": {
-    "eslint": "^8.0.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.23.4",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "lint-staged": "^12.0.2"
   }
 }
