@@ -38,7 +38,7 @@
   "dependencies": {
     "@discordjs/builders": "^0.12.0",
     "@discordjs/opus": "^0.7.0",
-    "chalk": "^4.1.2",
+    "chalk": "^5.0.1",
     "discord.js": "^13.5.1",
     "erela.js": "^2.3.3",
     "erela.js-deezer": "^1.0.5",
