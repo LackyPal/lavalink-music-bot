@@ -37,7 +37,7 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/builders": "^0.12.0",
-    "@discordjs/opus": "^0.7.0",
+    "@discordjs/opus": "^0.9.0",
     "chalk": "^4.1.2",
     "discord.js": "^13.5.1",
     "erela.js": "^2.3.3",
