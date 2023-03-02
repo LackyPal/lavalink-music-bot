@@ -45,7 +45,7 @@
     "erela.js-facebook": "^1.0.4",
     "erela.js-spotify": "^1.2.0",
     "genius-lyrics": "^4.2.9",
-    "glob": "^7.1.7",
+    "glob": "^9.1.2",
     "string-progressbar": "^1.0.4"
   }
 }
